@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import LandingPage from '@/components/LandingPage'
 import Patient from '@/components/Patient'
+import Scan from '@/components/Scan'
 
 Vue.use(Router)
 var landingPage = {
@@ -15,9 +16,15 @@ var patient = {
   component: Patient,
   props: true
 }
+var scan = {
+  path: '/scan/:id',
+  name: 'Scan',
+  component: Scan,
+  props: true
+}
 
 export default new Router({
   routes: [
-    landingPage, patient
+    landingPage, patient, scan
   ]
 })

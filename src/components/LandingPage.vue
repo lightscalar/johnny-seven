@@ -9,7 +9,7 @@
         </v-subheader>
         <v-spacer></v-spacer>
         <v-btn
-          class='black white--text'
+          primary
           @click.native='createPatient'>
           <v-icon left>
             person_add
@@ -17,6 +17,7 @@
           Add New Patient
         </v-btn>
       </v-card-title>
+      <v-divider></v-divider>
       <v-card-text>
         <v-data-table
           v-bind:pagination.sync="pagination"
@@ -25,7 +26,14 @@
           no-data-text='No Patients Available'
           class="elevation-0">
           <template slot="items" scope="props">
-            <td>{{ props.item.hid }}</td>
+            <td>
+              <v-subheader class='upper'>
+              <router-link :to="{name:'Patient', params:{'id': props.item._id}}">
+                {{ props.item.hid }}
+              </router-link>
+              </v-subheader>
+            </td>
+            <td>{{ props.item.createdAt }}</td>
           </template>
         </v-data-table>
       </v-card-text>
@@ -73,6 +81,7 @@
     computed: {
 
       patients () {
+        this.pagination.descending = true
         return this.$store.state.patients
       }
 
@@ -91,5 +100,7 @@
     width:100px;
     height:100px;
 }
-
+.upper {
+  text-transform: uppercase;
+}
 </style>

@@ -8,7 +8,10 @@ export default new Vuex.Store ({
   state: {
     socket: {connected: false},
     connected: false,
-    patient: {}
+    patient: {},
+    patients: [],
+    scan: {},
+    scans: []
   },
 
   mutations: {
@@ -21,6 +24,19 @@ export default new Vuex.Store ({
 
     setPatient (state, patient) {
       state.patient = patient
+    },
+
+    setPatients (state, patients) {
+      state.patients = patients
+    },
+
+    setScan (state, scan) {
+      state.scan = scan
+      router.push({name: 'Scan', params: {id: scan._id}})
+    },
+
+    setScans (state, scans) {
+      state.scans = scans
     }
 
   },
@@ -30,14 +46,33 @@ export default new Vuex.Store ({
     establishSocketConnection (context) {
 
       // CALLBACK FUNCTIONS
+
+      // PATIENTS
       function setPatient (patient) {
         context.commit('setPatient', patient)
         router.push({name: 'Patient', params: {id: patient._id}})
       }
 
+      function setPatients (patients) {
+        context.commit('setPatients', patients)
+      }
+
       function patientCreated(patient) {
         setPatient(patient)
-        console.log('Patient Created!')
+      }
+
+      // SCANS
+      function setScan (scan) {
+        context.commit('setScan', scan)
+      }
+
+      function setScans (scans) {
+        context.commit('setScans', scans)
+      }
+
+      function scanCreated(scan) {
+        setScan(scan)
+        router.push({name: 'Scan', params: {id: scan._id}})
       }
 
       // Set up the socket.
@@ -45,16 +80,21 @@ export default new Vuex.Store ({
       context.state.socket.emit('request_status')
 
       // Register listeners for the app.
-      context.state.socket.on('patient', setPatient)
       context.state.socket.on('patientCreated', patientCreated)
+      context.state.socket.on('patient', setPatient)
+      context.state.socket.on('patients', setPatients)
 
+      context.state.socket.on('scan', setScan)
+      context.state.socket.on('scans', setScans)
     },
 
     getPatients (context, patient) {
       context.dispatch('establishSocketConnection')
+      context.state.socket.emit('getPatients')
     },
 
     createPatient(context) {
+      context.dispatch('establishSocketConnection')
       context.state.socket.emit('createPatient')
     },
 
@@ -72,9 +112,30 @@ export default new Vuex.Store ({
       context.dispatch('establishSocketConnection')
       context.state.socket.emit('deletePatient', patient_id)
       router.push({name: 'LandingPage'})
-    }
+    },
 
-  },
+    createScan (context, patient_id) {
+      context.dispatch('establishSocketConnection')
+      context.state.socket.emit('createScan', patient_id)
+    },
+
+    getScans (context, patient_id) {
+      context.dispatch('establishSocketConnection')
+      context.state.socket.emit('getScans', patient_id)
+    },
+
+    getScan (context, scan_id) {
+      context.dispatch('establishSocketConnection')
+      context.state.socket.emit('getScan', scan_id)
+    },
+
+    deleteScan (context, scan_id) {
+      context.dispatch('establishSocketConnection')
+      context.state.socket.emit('deleteScan', scan_id)
+      router.push({name: 'LandingPage'})
+    },
+
+ },
 
 })
 

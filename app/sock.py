@@ -72,11 +72,48 @@ def getPatients(patient_id):
     emit('patient', patient)
 
 
+@socketio.on('createScan')
+def createScan(patient_id):
+    # Create a new scan.
+    print('Creating New Scan')
+    scan = {}
+    scan['patient_id'] = patient_id
+    scan['complete'] = False
+    scan['notes'] = ''
+    scan['gcs'] = 15
+    scan = db.insert('scan', scan)
+    emit('scan', scan)
+
+
+@socketio.on('getScans')
+def getScans(patient_id):
+    # List all available scans.
+    scans = db.find_where('scans', 'patient_id', patient_id)
+    emit('scans', scans)
+
+
+@socketio.on('getScan')
+def getScan(scan_id):
+    # Find specifically requested scan.
+    scan = db.find_by_id(scan_id)
+    emit('scan', scan)
+
+
+@socketio.on('deleteScan')
+def deleteScan(scan_id):
+    # Delete the specified scan.
+    doc = db.find_by_id(scan_id)
+    patient = db.find_by_id(doc.patient_id)
+    scan = db.delete(scan_id)
+    emit('patient', patient)
+
+
+
 @socketio.on('startScan')
-def startScan(patient_id):
+def startScan(scan):
     # Start scan for specified patient.
-    # TODO
-    pass
+    scan = db.update(scan)
+    scan_data = engine.scan()
 
 
 if __name__ == '__main__':

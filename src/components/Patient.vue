@@ -1,9 +1,46 @@
 <template>
   <v-layout>
-    <v-flex xs6>
+    <v-flex xs4 class='mr-4'>
+        <v-card>
+          <v-card-title>
+            <v-subheader>
+              Patient Scans
+            </v-subheader>
+            <v-spacer>
+            </v-spacer>
+            <v-btn primary @click.native='createScan'>
+             <v-icon left>
+               add_circle
+             </v-icon>
+             Add Scan
+            </v-btn>
+          </v-card-title>
+            <v-divider></v-divider>
+            <v-card-text>
+              <v-data-table
+                v-bind:pagination.sync="pagination"
+                v-bind:headers="headers"
+                :items="scans"
+                no-data-text='No Scans Available'
+                class="elevation-0">
+                <template slot="items" scope="props">
+                  <td>
+                    <v-subheader class='upper'>
+                      <router-link :to="{name:'Scan', params:{'id': props.item._id}}">
+                       {{ props.item.createdAt }}
+                      </router-link>
+                    </v-subheader>
+                  </td>
+                </template>
+              </v-data-table>
+            </v-card-text>
+        </v-card>
+    </v-flex>
+    <v-flex xs8>
       <v-card class='elevation-1'>
         <v-card-title>
-          <h4 class='mt-2 yellow--text text--darken-3'>
+          <h4 class='mt-2 yellow--text text--darken-3'
+            style='text-transform: uppercase'>
             {{patient.hid}}
           </h4>
         </v-card-title>
@@ -15,7 +52,8 @@
                 v-bind:items='genders'
                 v-model='patient.gender'
                 item-value='value'
-                label='Gender'></v-select>
+                label='Gender'>
+              </v-select>
             </v-flex>
             <v-flex xs4 offset-xs1>
               <v-text-field label='Age' v-model='patient.age'>
@@ -25,7 +63,7 @@
               <v-select
                 v-bind:items='gcs'
                 v-model='patient.gcs'
-                label='Glasgow Coma Scale'></v-select>
+                label='GCS'></v-select>
             </v-flex>
           </v-layout>
           <v-layout>
@@ -38,22 +76,19 @@
           </v-layout>
         </v-card-text>
         <v-card-actions>
-          <v-btn error icon>
+          <v-btn
+            @click.native='deletePatient'
+            error icon>
             <v-icon class='white--text'>
               delete_forever
             </v-icon>
           </v-btn>
           <v-spacer></v-spacer>
-          <v-btn @click.native='updatePatient' class='black white--text'>
+          <v-btn @click.native='updatePatient' primary>
             Update
           </v-btn>
         </v-card-actions>
       </v-card>
-    </v-flex>
-    <v-flex xs6 class='ml-3'>
-        <v-card>
-          Hi
-        </v-card>
     </v-flex>
 
     <v-snackbar v-model='showMessage' :top=true primary>
@@ -66,11 +101,10 @@
 
 <script>
   // import Component from "../component_location"
-  import Messenger from "./Messenger.vue"
 
   export default {
 
-    components: {Messenger},
+    components: {},
 
     props: ['id'],
 
@@ -83,7 +117,9 @@
         genders: [
           {text: 'Female', value: 'female'},
           {text: 'Male', value: 'male'}
-        ]
+        ],
+        headers: [{text: 'Created At', sortable: true, align:'left', value:'createdAt'}],
+        pagination: {sortBy: 'createdAt'}
 
       }
     },
@@ -98,6 +134,10 @@
 
       deletePatient () {
         this.$store.dispatch('deletePatient', this.id)
+      },
+
+      createScan () {
+        this.$store.dispatch('createScan', this.id)
       }
 
     },
@@ -106,12 +146,18 @@
 
       patient () {
         return this.$store.state.patient
+      },
+
+      scans () {
+        this.pagination.descending = true
+        return this.$store.state.scans
       }
 
     },
 
     mounted () {
       this.$store.dispatch('getPatient', this.id)
+      this.$store.dispatch('getScans', this.id)
 
     }
   }

@@ -1,7 +1,7 @@
 from bson import ObjectId
 import inflect
 import time
-from tinydb import TinyDB, Query
+from tinydb import TinyDB, Query, where
 
 
 def current_time():
@@ -49,8 +49,11 @@ class SolidDB(object):
         current_doc.update(new_doc)
         return current_doc
 
-    def find_where(self):
-        pass
+    def find_where(self, table, key, value):
+        # Grab matching elements from table.
+        table = self.db.table(table)
+        q = Query()
+        return table.search(where(key)==value)
 
     def delete(self, _id):
         '''Delete the document.'''
