@@ -10,6 +10,7 @@ yarn-error.log*
 *.ntvs*
 *.njsproj
 *.sln
+*.sw*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

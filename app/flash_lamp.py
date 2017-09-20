@@ -11,7 +11,7 @@ class FlashLamp(Thread):
         Thread.__init__(self)
 
         # Init parameters.
-        self.flash = False
+        self.flash = True
         self.go = True
         self.dt = 100
 
@@ -41,3 +41,7 @@ class FlashLamp(Thread):
         print('Killing Arduino')
         self.go = False
 
+
+if __name__ == '__main__':
+    f = FlashLamp()
+    f.flash_lamp()
