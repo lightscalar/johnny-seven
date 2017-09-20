@@ -16,5 +16,5 @@ if __name__ == '__main__':
     # Launch web server.
     Handler = http.server.SimpleHTTPRequestHandler
     httpd = socketserver.TCPServer(("", PORT), Handler)
-    print("Starting Static Server on Port ", PORT)
+    print("Launching Static Server on Port", PORT)
     httpd.serve_forever()
