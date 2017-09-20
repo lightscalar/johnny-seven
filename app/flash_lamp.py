@@ -4,7 +4,7 @@ import sys
 from time import sleep
 
 
-class Arduino(Thread):
+class FlashLamp(Thread):
 
     def __init__(self):
         # Intialize connection to the Gazepoint tracker.
