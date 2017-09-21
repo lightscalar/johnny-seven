@@ -1,10 +1,10 @@
 <template>
   <v-layout>
-    <v-flex xs6 v-if='!scan.complete'>
+    <v-flex xs6 v-if='!scan.isComplete && !isScanning'>
       <v-card>
         <v-card-title>
             <v-subheader>
-              Eye Scan
+              Pupillary Light Reflex Scan
             </v-subheader>
             <v-spacer></v-spacer>
         </v-card-title>
@@ -42,19 +42,91 @@
         </v-card-actions>
       </v-card>
     </v-flex>
-    <v-flex v-else>
+
+    <v-flex v-if='isScanning' xs6>
+
+    <v-card>
+      <v-card-text>
+        <v-layout>
+          <v-flex xs2>
+            <v-progress-circular
+              indeterminate
+              v-bind:size="70"
+              v-bind:width="7"
+              class="blue--text text--darken-3">
+            </v-progress-circular>
+          </v-flex>
+          <v-flex xs10>
+            <h5 class='mt-4'>Hold Steady. Scan is underway!</h5>
+          </v-flex>
+        </v-layout>
+      </v-card-text>
+    </v-card>
+    </v-flex>
+
+    <v-flex v-if='scan.isComplete'>
       <v-card>
         <v-card-title>
-          <h5 class='mt-3'>
-            Scan {{scan.updatedAt}}
-          </h5>  
+          <h6 class='mt-3'>
+            <span class=''>Patient</span>
+            <router-link :to="{name: 'Patient', params: {id: patient._id}}">
+            <span class='' style='text-transform: uppercase'>
+              {{patient.hid}}
+            </span>
+            </router-link>
+            @ {{scan.updatedAt}}
+          </h6>
           <v-spacer></v-spacer>
-          <v-btn icon error>
+          <v-btn icon error @click.native='deleteScan'>
             <v-icon class='white--text'>
-              delete
+              delete_forever
             </v-icon>
           </v-btn>
         </v-card-title>
+
+        <v-card-text>
+          <v-layout>
+            <v-flex xs4 lg2>
+              <v-text-field  v-model='scan.notes' label='Notes' disabled>
+              </v-text-field>
+            </v-flex>
+            <v-flex xs4 lg2 offset-xs1>
+              <v-text-field v-model='scan.gcs' label='GCS' disabled>
+              </v-text-field>
+            </v-flex>
+            <v-flex xs4 lg2 offset-xs1>
+              <v-chip v-if='scan.isComplete' class='green white--text'>
+                Scan Successful
+              </v-chip>
+              <v-chip v-else class='red darken-3 white--text'>
+                Scan Failed
+              </v-chip>
+            </v-flex>
+          </v-layout>
+        </v-card-text>
+
+        <v-card-text>
+          <v-data-table
+              v-bind:headers="headers"
+              :items="results"
+              no-data-text='No Scans Available'
+              class="elevation-0">
+            <template slot="items" scope="props">
+              <td>
+                {{props.item.description}}
+              </td>
+              <td>
+                {{props.item.left}}
+              </td>
+              <td>
+                {{props.item.right}}
+              </td>
+              <td>
+                {{props.item.units}}
+              </td>
+            </template>
+          </v-data-table>
+        </v-card-text>
         </v-card>
     </v-flex>
   </v-layout>
@@ -73,6 +145,12 @@
     data () {
       return {
         gcs: [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+        headers: [
+          {text: 'Description', value: 'description', sortable: false, align: 'left'},
+          {text: 'Left', value: 'left', sortable: false, align: 'left'},
+          {text: 'Right', value: 'right', sortable: false, align: 'left'},
+          {text: 'Units', value: 'units', sortable: false, align: 'left'},
+        ]
       }
     },
 
@@ -80,6 +158,10 @@
 
       startScan () {
         this.$store.dispatch('startScan', this.scan)
+      },
+
+      deleteScan () {
+        this.$store.dispatch('deleteScan', this.scan._id)
       }
 
     },
@@ -87,8 +169,26 @@
     computed: {
 
       scan () {
-        console.log(this.$store.state.scan)
         return this.$store.state.scan
+      },
+
+      patient () {
+        return this.$store.state.patient
+      },
+
+      isScanning () {
+        return this.$store.state.isScanning
+      },
+
+      results () {
+
+        var res = []
+        res.push({description: 'Amplitude', left: 5, right: 4, units: 'mm'})
+        res.push({description: 'Average Velocity', left: 5, right: 4, units: 'mm/s'})
+        res.push({description: 'Latency', left: 5, right: 4, units: 'ms'})
+        res.push({description: 'Recovery Time', left: 5, right: 4, units: 'ms'})
+        return res
+
       }
 
     },

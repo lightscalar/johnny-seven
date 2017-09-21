@@ -61,8 +61,6 @@
           {text: 'Created At', value: 'createdAt', sortable: true, align: 'left'}],
 
         pagination: {sortBy: 'createdAt'}
-
-
       }
     },
 

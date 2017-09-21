@@ -7,14 +7,14 @@ from time import sleep
 # PORTS
 # ----------------
 # STATIC    - 5000
-# SOCK API  - 5200
+# REST API  - 5100
 # GAZEPOINT - 4242
 
 # Serve the static site.
 static_site = Popen(['python', 'static.py'])
 
 # Launch the UI's socket server!
-sock_api = Popen(['python', 'sock.py'])
+rest_api = Popen(['python', 'rest.py'])
 
 # Monitor processes; shut down on keyboard break.
 try:
@@ -22,5 +22,5 @@ try:
         sleep(1)
 except KeyboardInterrupt:
     static_site.kill()
-    sock_api.kill()
+    rest_api.kill()
 

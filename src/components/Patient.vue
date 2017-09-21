@@ -43,6 +43,20 @@
             style='text-transform: uppercase'>
             {{patient.hid}}
           </h4>
+          <v-spacer></v-spacer>
+          <v-btn
+            @click.native='deletePatient'
+            error icon>
+            <v-icon class='white--text'>
+              delete_forever
+            </v-icon>
+          </v-btn>
+          <v-btn @click.native='updatePatient' primary>
+            <v-icon left>
+              update
+            </v-icon>
+            Update
+          </v-btn>
         </v-card-title>
         <v-divider></v-divider>
         <v-card-text>
@@ -75,19 +89,6 @@
             </v-flex>
           </v-layout>
         </v-card-text>
-        <v-card-actions>
-          <v-btn
-            @click.native='deletePatient'
-            error icon>
-            <v-icon class='white--text'>
-              delete_forever
-            </v-icon>
-          </v-btn>
-          <v-spacer></v-spacer>
-          <v-btn @click.native='updatePatient' primary>
-            Update
-          </v-btn>
-        </v-card-actions>
       </v-card>
     </v-flex>
 

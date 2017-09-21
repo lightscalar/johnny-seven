@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import api from '../api/index'
 Vue.use(Vuex)
 
 
@@ -11,16 +12,11 @@ export default new Vuex.Store ({
     patient: {},
     patients: [],
     scan: {},
-    scans: []
+    scans: [],
+    isScanning: false
   },
 
   mutations: {
-
-    setSocket (state) {
-      if (!state.connected) {
-        state.socket = io.connect('http://localhost:5200')
-      }
-    },
 
     setPatient (state, patient) {
       state.patient = patient
@@ -32,121 +28,86 @@ export default new Vuex.Store ({
 
     setScan (state, scan) {
       state.scan = scan
-      console.log('SCAN RECVD!')
-      console.log(scan)
-      router.push({name: 'Scan', params: {id: scan._id}})
     },
 
     setScans (state, scans) {
       state.scans = scans
+    },
+
+    setScanning (state, isScanning) {
+      state.isScanning = isScanning
     }
+
 
   },
 
   actions: {
 
-    establishSocketConnection (context) {
-
-      // CALLBACK FUNCTIONS
-
-      // PATIENTS
-      function setPatient (patient) {
-        context.commit('setPatient', patient)
-        router.push({name: 'Patient', params: {id: patient._id}})
-      }
-
-      function setPatients (patients) {
-        context.commit('setPatients', patients)
-      }
-
-      function patientCreated(patient) {
-        setPatient(patient)
-      }
-
-      // SCANS
-      function setScan (scan) {
-        console.log('RECVD Scan Event')
-        context.commit('setScan', scan)
-      }
-
-      function setScans (scans) {
-        context.commit('setScans', scans)
-      }
-
-      function scanCreated(scan) {
-        setScan(scan)
-        router.push({name: 'Scan', params: {id: scan._id}})
-      }
-
-      function yell(scan) {
-        console.log('YELLING')
-      }
-
-      // Set up the socket.
-      context.commit('setSocket')
-      context.state.socket.emit('request_status')
-
-      // Register listeners for the app.
-      context.state.socket.on('patientCreated', patientCreated)
-      context.state.socket.on('patient', setPatient)
-      context.state.socket.on('patients', setPatients)
-
-      context.state.socket.on('scan', setScan)
-      context.state.socket.on('scans', setScans)
-      context.state.socket.on('scanComplete', yell)
-    },
-
-    getPatients (context, patient) {
-      context.dispatch('establishSocketConnection')
-      context.state.socket.emit('getPatients')
-    },
-
     createPatient(context) {
-      context.dispatch('establishSocketConnection')
-      context.state.socket.emit('createPatient')
+      api.postResource('patients').then( function(resp) {
+        context.commit('setPatient', resp.data)
+        router.push({name:'Patient', params:{id: resp.data._id}})
+      })
+    },
+
+    deletePatient(context, patient_id) {
+      api.deleteResource('patient', patient_id).then(function () {
+        router.push({name: 'LandingPage'})
+      })
     },
 
     getPatient (context, patient_id) {
-      context.dispatch('establishSocketConnection')
-      context.state.socket.emit('getPatient', patient_id)
+      api.getResource('patient', patient_id).then( function (resp) {
+        context.commit('setPatient', resp.data)
+      })
     },
 
-    updatePatient (context, patient) {
-      context.dispatch('establishSocketConnection')
-      context.state.socket.emit('updatePatient', patient)
+    getPatients (context) {
+      api.listResource('patients').then( function (resp) {
+        context.commit('setPatients', resp.data)
+      })
     },
 
-    deletePatient (context, patient_id) {
-      context.dispatch('establishSocketConnection')
-      context.state.socket.emit('deletePatient', patient_id)
-      router.push({name: 'LandingPage'})
-    },
-
-    createScan (context, patient_id) {
-      context.dispatch('establishSocketConnection')
-      context.state.socket.emit('createScan', patient_id)
-    },
 
     getScans (context, patient_id) {
-      context.dispatch('establishSocketConnection')
-      context.state.socket.emit('getScans', patient_id)
+      api.listNestedResource('patient', patient_id, 'scans')
+        .then( function (resp) {
+        context.commit('setScans', resp.data)
+      })
     },
 
-    getScan (context, scan_id) {
-      context.dispatch('establishSocketConnection')
-      context.state.socket.emit('getScan', scan_id)
+    updatePatient(context, patient) {
+      api.putResource('patient', patient).then(function (resp) {
+        context.commit('setPatient', resp.data)
+      })
     },
 
-    deleteScan (context, scan_id) {
-      context.dispatch('establishSocketConnection')
-      context.state.socket.emit('deleteScan', scan_id)
-      router.push({name: 'LandingPage'})
+    createScan(context, patient_id) {
+      api.postNestedResource('patient', patient_id, 'scans').then(function (resp) {
+        context.commit('setScan', resp.data)
+        router.push({name:'Scan', params: {id: resp.data._id}})
+      })
     },
 
-    startScan (context, scan) {
-      console.log('Starting Scan.')
-      context.dispatch('establishSocketConnection')
-      context.state.socket.emit('startScan', scan)
+    getScan(context, scan_id) {
+      api.getResource('scan', scan_id).then( function (resp) {
+        context.commit('setScan', resp.data)
+        context.dispatch('getPatient', resp.data.patient_id)
+      })
+    },
+
+    startScan(context, scan) {
+      context.commit('setScanning', true)
+      api.postResource('commands', scan).then(function (resp) {
+        context.commit('setScan', resp.data)
+        context.commit('setScanning', false)
+      })
+    },
+
+    deleteScan(context, scan_id) {
+      api.deleteResource('scan', scan_id).then(function (resp) {
+        router.push({name:'Patient', params:{id:resp.data._id}})
+      })
     }
 
  },
