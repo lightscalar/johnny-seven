@@ -2,12 +2,16 @@ from flask import Flask
 from flask_socketio import SocketIO, send, emit
 from solid_db import *
 from sixer import *
+from gazepoint import *
 
 
 PORT = 5200
 app = Flask(__name__)
 socketio = SocketIO(app)
 db = SolidDB('data/db.json')
+
+# Connect to the Gazepoint.
+gaze_point = GazePoint()
 
 
 # Define status object
@@ -108,14 +112,28 @@ def deleteScan(scan_id):
     emit('patient', patient)
 
 
-
 @socketio.on('startScan')
 def startScan(scan):
     # Start scan for specified patient.
+    print('Starting Scan')
     scan = db.update(scan)
-    scan_data = engine.scan()
+    gaze_point.collect(scan)
+
+
+def collection_complete(scan):
+    # Collection complete; announce to the world.
+    print('Collection Is Complete')
+    scan['complete'] = True
+    scan = db.update(scan)
+    socketio.emit('scan', scan)
+    print('Emitting another event')
+    socketio.emit('scanComplete', {'name': 'mjl'})
+    
+
+# Add event handler for collection complete.
+gaze_point.events.on_complete += collection_complete
 
 
 if __name__ == '__main__':
     print('Launching Socket Server on Port {}'.format(PORT))
-    socketio.run(app, port=PORT, debug=False)
+    socketio.run(app, port=PORT, debug=True)

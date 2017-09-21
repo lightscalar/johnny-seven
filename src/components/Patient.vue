@@ -1,6 +1,6 @@
 <template>
   <v-layout>
-    <v-flex xs4 class='mr-4'>
+    <v-flex xs6 class='mr-2'>
         <v-card>
           <v-card-title>
             <v-subheader>
@@ -36,7 +36,7 @@
             </v-card-text>
         </v-card>
     </v-flex>
-    <v-flex xs8>
+    <v-flex xs6>
       <v-card class='elevation-1'>
         <v-card-title>
           <h4 class='mt-2 yellow--text text--darken-3'

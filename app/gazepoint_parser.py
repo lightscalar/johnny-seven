@@ -10,12 +10,11 @@ def xml_to_time(data):
     for t in times:
         f = grab_float(t)
         if t:
-            time_array = append(time_array, f)
-    if len(time_array)>0:
+            time_array = append(time_array, f) 
+    if len(time_array)>0: 
         return median(time_array)    
-    else:
+    else: 
         return -1    
-
 
 def parse_data(data):
     # Scan the XML to extract what we want.

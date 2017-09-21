@@ -1,6 +1,6 @@
 <template>
   <v-layout>
-    <v-flex xs3 v-if='!scan.complete'>
+    <v-flex xs6 v-if='!scan.complete'>
       <v-card>
         <v-card-title>
             <v-subheader>
@@ -33,7 +33,7 @@
 
         </v-card-text>
         <v-card-actions>
-          <v-btn large primary>
+          <v-btn large primary @click.native='startScan'>
             <v-icon left>
               play_arrow
             </v-icon>
@@ -41,7 +41,21 @@
           </v-btn>
         </v-card-actions>
       </v-card>
-
+    </v-flex>
+    <v-flex v-else>
+      <v-card>
+        <v-card-title>
+          <h5 class='mt-3'>
+            Scan {{scan.updatedAt}}
+          </h5>  
+          <v-spacer></v-spacer>
+          <v-btn icon error>
+            <v-icon class='white--text'>
+              delete
+            </v-icon>
+          </v-btn>
+        </v-card-title>
+        </v-card>
     </v-flex>
   </v-layout>
 
@@ -73,6 +87,7 @@
     computed: {
 
       scan () {
+        console.log(this.$store.state.scan)
         return this.$store.state.scan
       }
 

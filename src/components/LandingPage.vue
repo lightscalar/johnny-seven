@@ -1,7 +1,7 @@
 <template>
 
   <v-layout>
-    <v-flex xs6 offset-xs3>
+    <v-flex xs8 offset-xs2>
     <v-card>
       <v-card-title text-xs-center>
         <v-subheader>

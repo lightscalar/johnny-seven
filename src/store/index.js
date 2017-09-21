@@ -32,6 +32,8 @@ export default new Vuex.Store ({
 
     setScan (state, scan) {
       state.scan = scan
+      console.log('SCAN RECVD!')
+      console.log(scan)
       router.push({name: 'Scan', params: {id: scan._id}})
     },
 
@@ -63,6 +65,7 @@ export default new Vuex.Store ({
 
       // SCANS
       function setScan (scan) {
+        console.log('RECVD Scan Event')
         context.commit('setScan', scan)
       }
 
@@ -73,6 +76,10 @@ export default new Vuex.Store ({
       function scanCreated(scan) {
         setScan(scan)
         router.push({name: 'Scan', params: {id: scan._id}})
+      }
+
+      function yell(scan) {
+        console.log('YELLING')
       }
 
       // Set up the socket.
@@ -86,6 +93,7 @@ export default new Vuex.Store ({
 
       context.state.socket.on('scan', setScan)
       context.state.socket.on('scans', setScans)
+      context.state.socket.on('scanComplete', yell)
     },
 
     getPatients (context, patient) {
@@ -134,6 +142,12 @@ export default new Vuex.Store ({
       context.state.socket.emit('deleteScan', scan_id)
       router.push({name: 'LandingPage'})
     },
+
+    startScan (context, scan) {
+      console.log('Starting Scan.')
+      context.dispatch('establishSocketConnection')
+      context.state.socket.emit('startScan', scan)
+    }
 
  },
 

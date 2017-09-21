@@ -2,6 +2,7 @@ from events import Events
 from flash_lamp import FlashLamp
 from gazepoint_parser import *
 import numpy as np
+from processor import *
 import serial
 import socket
 from threading import Thread
@@ -12,11 +13,11 @@ class GazePoint(Thread):
 
     def __init__(self):
         # Initialize as thread.
-        Thread.__init__()
+        Thread.__init__(self)
 
         # Define Gazepoint host/port...
         self.host = '127.0.0.1'
-        self.port = '4242'
+        self.port = 4242
         self.address = (self.host, self.port)
         self.connected = False
         self.lamp = FlashLamp()
@@ -41,13 +42,15 @@ class GazePoint(Thread):
         if self.connected:
             self.start()
 
-    def collect(self):
+    def collect(self, scan):
         # Start collecting from the Gazepoint system.
+        self.scan = scan
         self.is_collecting = True
 
     def run(self):
         # Main loop of the thread.
         while self.go:
+
             if self.is_collecting:
 
                 # Start collecting data.
@@ -60,19 +63,12 @@ class GazePoint(Thread):
                 flash_time = 0
 
                 # Standard 16 second scan.
-                while (max_time - min_time) < 16:
+                while (time.time() - start_time) < 16:
 
                     # Grab the time stamp.
                     rx_data = self.socket.recv(512)
                     xml_obs = bytes.decode(rx_data)
                     ts = xml_to_time(xml_obs)
-
-                    # Update time boundaries.
-                    if ts > 0:
-                        if ts < min_time:
-                            min_time = ts
-                        else:
-                            max_time = ts
 
                     # Append raw XML observations
                     scanner_data.append(xml_obs)
@@ -80,25 +76,32 @@ class GazePoint(Thread):
                     # Should we flash the lamp?
                     if (time.time() - start_time) >= 8:
                         if not flashed:
+                            print('Flashing Lamp')
                             flash_time = (time.time(), ts)
                             self.lamp.flash_lamp()
                             flashed=True
 
                 # We are done. Now parse the data, etc.
+                print('Finished Data Collection')
+                self.is_collecting = False
                 obs = parse_data(scanner_data)
                 data = generate_time_series(obs)
                 try:
-                    scan = j6_analysis(data, scan_id)
-                    scan['isSuccess'] = True
+                    self.scan = j6_analysis(data, self.scan)
+                    self.scan['isSuccess'] = True
                 except:
-                    scan['isSuccess'] = False
+                    self.scan['isSuccess'] = False
 
                 # Announce we are finished!
-                self.events.on_data(scan)
+                print('Processing Complete')
+                self.events.on_complete(self.scan)
 
 
     def kill(self):
         # Kill the thread.
+        print('Killing the Gazepoint Connection')
+        self.socket.close()
+        self.lamp.kill()
         self.go = False
 
 
