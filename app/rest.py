@@ -6,6 +6,7 @@ from flask_cors import CORS
 from sixer import sixer
 from solid_db import *
 from time import sleep
+from gazepoint import GazePoint
 
 
 '''RESTFUL API for the Biomonitor.'''
@@ -14,6 +15,7 @@ app = Flask(__name__)
 CORS(app)
 api = Api(app)
 db = SolidDB('data/db.json')
+gazepoint = GazePoint()
 
 
 class Patients(Resource):
@@ -104,9 +106,9 @@ class Commands(Resource):
     def post(self):
         # Initiate a scan.
         scan = request.json
+        scan = gazepoint.collect(scan)
         scan['isComplete'] = True
         scan = db.update(scan)
-        sleep(3)
         return scan
 
 

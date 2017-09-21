@@ -1,6 +1,6 @@
 <template>
   <v-layout>
-    <v-flex xs6 v-if='!scan.isComplete && !isScanning'>
+    <v-flex xs12 v-if='!scan.isComplete && !isScanning'>
       <v-card>
         <v-card-title>
             <v-subheader>
@@ -43,12 +43,12 @@
       </v-card>
     </v-flex>
 
-    <v-flex v-if='isScanning' xs6>
+    <v-flex v-if='isScanning' xs12>
 
     <v-card>
       <v-card-text>
         <v-layout>
-          <v-flex xs2>
+          <v-flex lg6 md6>
             <v-progress-circular
               indeterminate
               v-bind:size="70"
@@ -56,7 +56,7 @@
               class="blue--text text--darken-3">
             </v-progress-circular>
           </v-flex>
-          <v-flex xs10>
+          <v-flex lg6 md6>
             <h5 class='mt-4'>Hold Steady. Scan is underway!</h5>
           </v-flex>
         </v-layout>
@@ -95,7 +95,7 @@
               </v-text-field>
             </v-flex>
             <v-flex xs4 lg2 offset-xs1>
-              <v-chip v-if='scan.isComplete' class='green white--text'>
+              <v-chip v-if='scan.isSuccess' class='green white--text'>
                 Scan Successful
               </v-chip>
               <v-chip v-else class='red darken-3 white--text'>

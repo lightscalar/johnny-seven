@@ -99,6 +99,7 @@ export default new Vuex.Store ({
     startScan(context, scan) {
       context.commit('setScanning', true)
       api.postResource('commands', scan).then(function (resp) {
+        console.log(resp.data)
         context.commit('setScan', resp.data)
         context.commit('setScanning', false)
       })

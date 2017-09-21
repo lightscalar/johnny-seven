@@ -64,7 +64,7 @@ def extract_plr_measurements(t, d):
     # This as a matter of definition.
     percent_max = 0.50 * roc[max_curvature_idx]
     t_max_curv = t[max_curvature_idx]
-    t_lat_idx = valid_range(t, t_max_curv, 8.50)
+    t_lat_idx = valid_range(t, t_max_curv, 9.0)
     target = nonzero(roc[t_lat_idx]<= percent_max)[0] + t_lat_idx[0]
     max_curvature_idx = target[0]
 

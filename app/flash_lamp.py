@@ -45,3 +45,4 @@ class FlashLamp(Thread):
 if __name__ == '__main__':
     f = FlashLamp()
     f.flash_lamp()
+    f.kill()

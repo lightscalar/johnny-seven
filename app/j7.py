@@ -1,4 +1,6 @@
 '''Launch all servers, etc., for Johnny-Seven!'''
+import eventlet
+eventlet.monkey_patch()
 from subprocess import Popen
 from time import sleep
 
