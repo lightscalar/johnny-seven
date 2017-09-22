@@ -2,7 +2,7 @@ from events import Events
 from flash_lamp import FlashLamp
 from gazepoint_parser import *
 import numpy as np
-from processor import *
+from data_explorer import *
 import serial
 import socket
 from threading import Thread
@@ -71,23 +71,15 @@ class GazePoint(object):
 
         # We are done. Now parse the data, etc.
         print('Finished Data Collection')
-        return flash_time, scanner_data
-    
-        obs = parse_data(scanner_data)
-        data = generate_time_series(obs)
-        return data
-        self.scan = j6_analysis(data, self.scan)
-        try:
-            self.scan['isSuccess'] = True
-        except:
-            self.scan['isSuccess'] = False
+        scan = process_raw_data((flash_time, scanner_data), scan)
 
         # Announce we are finished!
-        print('Processing Complete')
-        return self.scan
-
-
+        print('Data Processing Complete')
+        return scan
 
     def kill(self):
         self.socket.close()
         self.lamp.kill()
+
+
+

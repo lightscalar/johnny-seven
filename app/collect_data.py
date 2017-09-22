@@ -11,9 +11,9 @@ if __name__ == '__main__':
     data = gazepoint.collect(scan)
     gazepoint.kill()
 
-    v = Vessel('eye-scan-01.dat')
-    v.data = data
-    v.save()
+    # v = Vessel('eye-scan-04.dat')
+    # v.data = data
+    # v.save()
 
 
 
