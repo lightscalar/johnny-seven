@@ -9,7 +9,7 @@ from time import sleep
 from gazepoint import GazePoint
 
 
-'''RESTFUL API for the Biomonitor.'''
+'''RESTFUL API for Johnny Seven'''
 PORT = 5100
 app = Flask(__name__)
 CORS(app)

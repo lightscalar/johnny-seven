@@ -13,6 +13,27 @@ def q(statement):
     return nonzero(statement)[0]
 
 
+def retrieve_series(package):
+    # Return time, diameters, etc.
+    flash_time = package[0]
+    raw_data = package[1]
+    obs = parse_data(raw_data)
+    tser = generate_time_series(obs)
+    t = np.array(tser['time'])
+    left = np.array(tser['left']['diameter'])
+    right = np.array(tser['right']['diameter'])
+    idx = q(t>0)
+    t = t[idx]
+    left = left[idx] * 1000
+    right = right[idx] * 1000
+    t_start = t.min()
+    t -= t_start
+    left = taut_string(left, 0.01)
+    right = taut_string(right, 0.01)
+    flash_time = flash_time[1] - t_start
+    return t, flash_time, left, right
+
+
 def extrema_in_range(t, v, mint, maxt):
     # Find time, index, and value.
     idx = q( (t>mint) * (t<maxt))
@@ -35,6 +56,10 @@ def process_raw_data(package, scan):
     raw_data = package[1]
     scan['flash_time'] = flash_time[1]
     scan['raw_data'] = raw_data
+    v = Vessel('diagnostics.dat')
+    v.package = package
+    v.scan = scan
+    v.save()
 
     # Parse the raw data; extract time series.
     obs = parse_data(raw_data)
@@ -43,15 +68,15 @@ def process_raw_data(package, scan):
     left = np.array(tser['left']['diameter'])
     right = np.array(tser['right']['diameter'])
 
-    try:
-        scan['left'] = extract_plr(t, left, flash_time, scan_id=scan['_id'], \
-                which_eye='LEFT')
-        scan['right'] = extract_plr(t, right, flash_time, scan_id=scan['_id'], \
-                which_eye='RIGHT')
-        scan['isSuccess'] = True
-    except:
-        print('Data Processing of Scan Failed')
-        scan['isSuccess'] = False
+#    try:
+    scan['left'] = extract_plr(t, left, flash_time, scan_id=scan['_id'], \
+            which_eye='LEFT')
+    scan['right'] = extract_plr(t, right, flash_time, scan_id=scan['_id'], \
+            which_eye='RIGHT')
+    scan['isSuccess'] = True
+#    except:
+#        print('Data Processing of Scan Failed')
+#        scan['isSuccess'] = False
 
     return scan
 
@@ -68,7 +93,11 @@ def extract_plr(t, dr, flash_time, scan_id='1234', which_eye='LEFT'):
     dr = taut_string(dr, 0.01)
     
     # Fit with cubic splines
-    idx = q( (t>7.0) * (t<12.0))
+    flash_time = flash_time[1] - t_start
+    t_mn = flash_time - 1.0 
+    t_mx = flash_time + 5.0
+    
+    idx = q( (t>t_mn) * (t<t_mx))
     t_ = t[idx]
     dr_ = dr[idx]
     f = Fit(t_, 100, basis_type='cubic-spline', reg_coefs=[0, 1e-2, 9e-3])
@@ -80,7 +109,7 @@ def extract_plr(t, dr, flash_time, scan_id='1234', which_eye='LEFT'):
     except:
         roc = inf
 
-    roc = taut_string(roc, 0.10)
+    roc = taut_string(roc, 0.20)
 
     peaks = []
     for itr, val in enumerate(roc):
@@ -90,9 +119,8 @@ def extract_plr(t, dr, flash_time, scan_id='1234', which_eye='LEFT'):
             peaks.append(t_[itr])
 
     # Light flash time.
-    closest_index = np.abs(t_ - flash_time[1])
+    closest_index = np.abs(t_ - flash_time)
     flash_idx = np.argmin(closest_index)
-    flash_time = flash_time[1] - t_start
 
     # Starting amplitude.
     starting_amplitude = dr[flash_idx]
@@ -105,14 +133,14 @@ def extract_plr(t, dr, flash_time, scan_id='1234', which_eye='LEFT'):
     med_amplitude = np.median(dr_)
     std_amplitude = dr_.std()
     roc -= mean(roc)
-    roc = roc * roc.std() * std_amplitude/5
+    roc = roc * roc.std() * std_amplitude/2
     roc += med_amplitude
     latency = peak_time - flash_time
     print('Latency is {:0.3f}'.format(latency))
 
     # Minimum amplitude.
     idx_min, idx_max, t_min, t_max, v_min, v_max =\
-            extrema_in_range(r.x, r.y, 7, 10)
+            extrema_in_range(r.x, r.y, t_mn, t_mx-2)
     minimum_amplitude = v_min
     minimum_time = t_min
     delta_amplitude = starting_amplitude - minimum_amplitude
@@ -151,8 +179,13 @@ def extract_plr(t, dr, flash_time, scan_id='1234', which_eye='LEFT'):
 
 
 if __name__ == '__main__':
-    eye = Vessel('eye-scan-04.dat')
-    scan = {'_id': 'hello'}
+    from pylab import *
+    ion()
+    close('all')
 
-    data = eye.data
-    scan = process_raw_data(data, scan)
+    # Run diagnostics on the last scan run.
+    diagnostics = Vessel('diagnostics.dat')
+    package = diagnostics.package
+    scan = diagnostics.scan
+    scan = process_raw_data(package, scan)
+    t, ft, left, right = retrieve_series(package)
