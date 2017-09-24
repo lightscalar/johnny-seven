@@ -96,6 +96,11 @@ def extract_plr(t, dr, flash_time, scan_id='1234', which_eye='LEFT'):
     flash_time = flash_time[1] - t_start
     t_mn = flash_time - 1.0 
     t_mx = flash_time + 5.0
+
+    t_mn -= t.min()
+    t_mx -= t.min()
+    flash_time -= t.min()
+    t -= t.min()
     
     idx = q( (t>t_mn) * (t<t_mx))
     t_ = t[idx]
@@ -173,8 +178,11 @@ def extract_plr(t, dr, flash_time, scan_id='1234', which_eye='LEFT'):
     y_lim = plt.ylim([med_amplitude-3*std_amplitude, med_amplitude + std_amplitude])
     plt.plot([flash_time, flash_time], [0, 10], 'r--')
     plt.plot([peak_time, peak_time], [0, 10], 'r--')
-    plt.xlim([7,12])
-    plt.savefig('{}_{}.png'.format(scan_id, which_eye))
+    plt.xlim([t_mn, t_mx])
+    plt.xlabel('Time (Seconds)')
+    plt.ylabel('Pupil Diameter (mm)')
+    location = '../static/plots'
+    plt.savefig('{}/{}_{}.png'.format(location, scan_id, which_eye))
     return package
 
 

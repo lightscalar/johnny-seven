@@ -109,6 +109,7 @@
           <v-data-table
               v-bind:headers="headers"
               :items="results"
+              hide-actions
               no-data-text='No Scans Available'
               class="elevation-0">
             <template slot="items" scope="props">
@@ -116,10 +117,10 @@
                 {{props.item.description}}
               </td>
               <td>
-                {{props.item.left}}
+                {{props.item.left | formatNumber('%0.3f')}}
               </td>
               <td>
-                {{props.item.right}}
+                {{props.item.right | formatNumber('%0.3f')}}
               </td>
               <td>
                 {{props.item.units}}
@@ -127,6 +128,30 @@
             </template>
           </v-data-table>
         </v-card-text>
+        </v-card>
+        </br>
+        <v-card>
+            <v-card-title>
+            <v-subheader>
+                Right Eye Scan
+            </v-subheader>
+            </v-card-title>
+            <v-divider></v-divider>
+            <v-card-text>
+                <img class='scan-plot' v-bind:src='scanPlotUrl("RIGHT")'/>
+            </v-card-text>
+        </v-card>
+        <br/>
+        <v-card>
+            <v-card-title>
+            <v-subheader>
+                Right Eye Scan
+            </v-subheader>
+            </v-card-title>
+            <v-divider></v-divider>
+            <v-card-text>
+                <img class='scan-plot' v-bind:src='scanPlotUrl("LEFT")'/>
+            </v-card-text>
         </v-card>
     </v-flex>
   </v-layout>
@@ -162,7 +187,11 @@
 
       deleteScan () {
         this.$store.dispatch('deleteScan', this.scan._id)
-      }
+      },
+
+      scanPlotUrl(whichEye) {
+        return 'plots/' + this.scan._id + '_' + whichEye + '.png'
+      },
 
     },
 
@@ -171,6 +200,7 @@
       scan () {
         return this.$store.state.scan
       },
+
 
       patient () {
         return this.$store.state.patient
@@ -235,5 +265,7 @@
 </script>
 
 <style>
-
+.scan-plot {
+    width: 100%
+}
 </style>
