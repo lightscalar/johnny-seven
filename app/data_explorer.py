@@ -16,10 +16,12 @@ def q(statement):
 def retrieve_series(package):
     # Return time, diameters, etc.
     flash_time = package[0]
+    raw_flash_time = flash_time[1]
     raw_data = package[1]
     obs = parse_data(raw_data)
     tser = generate_time_series(obs)
     t = np.array(tser['time'])
+    t = t - raw_flash_time + 1.0
     left = np.array(tser['left']['diameter'])
     right = np.array(tser['right']['diameter'])
     idx = q(t>0)
@@ -83,6 +85,9 @@ def process_raw_data(package, scan):
 
 def extract_plr(t, dr, flash_time, scan_id='1234', which_eye='LEFT'):
     # Extract PLR parameters from provided time series.
+    flash_time = flash_time[1]
+    t = t - (flash_time - 1)
+    flash_time = 1.0
 
     # Find valid points
     idx = q(t>0)
@@ -93,14 +98,16 @@ def extract_plr(t, dr, flash_time, scan_id='1234', which_eye='LEFT'):
     dr = taut_string(dr, 0.01)
     
     # Fit with cubic splines
-    flash_time = flash_time[1] - t_start
-    t_mn = flash_time - 1.0 
-    t_mx = flash_time + 5.0
+    # flash_time = flash_time[1] - t_start
+    # t_mn = flash_time - 1.0 _
+    # t_mx = flash_time + 5.0
+    t_mn = 0
+    t_mx = 5
 
-    t_mn -= t.min()
-    t_mx -= t.min()
-    flash_time -= t.min()
-    t -= t.min()
+    # t_mn -= t.min()
+    # t_mx -= t.min()
+    # flash_time -= t.min()
+    # t -= t.min()
     
     idx = q( (t>t_mn) * (t<t_mx))
     t_ = t[idx]
@@ -152,13 +159,14 @@ def extract_plr(t, dr, flash_time, scan_id='1234', which_eye='LEFT'):
     average_speed = (delta_amplitude)/(minimum_time - peak_time)
 
     # Find the recovery time.
-    recovery_amplitude = 0.75 * starting_amplitude
+    recovery_amplitude = 0.75 * delta_amplitude + minimum_amplitude
     idx_after_min = q(t>minimum_time)
     t_after_min = t[idx_after_min]
     amp_after_min = dr[idx_after_min]
     recovery_idx = q(amp_after_min >= recovery_amplitude)[0]
     if recovery_idx:
         recovery_time = t_after_min[recovery_idx] - flash_time
+        time_of_recovery = t_after_min[recovery_idx]
     else:
         recovery_time = -1
 
@@ -176,8 +184,11 @@ def extract_plr(t, dr, flash_time, scan_id='1234', which_eye='LEFT'):
     plt.plot(r.x, r.y, color='#c62828', linewidth=3)
     plt.plot(t_, roc, color='#305580', linewidth=3, alpha=0.5)
     y_lim = plt.ylim([med_amplitude-3*std_amplitude, med_amplitude + std_amplitude])
-    plt.plot([flash_time, flash_time], [0, 10], 'r--')
-    plt.plot([peak_time, peak_time], [0, 10], 'r--')
+    plt.plot([0, 5], [starting_amplitude, starting_amplitude], ':', color='#2f2f2f')
+    plt.plot([0, 5], [minimum_amplitude, minimum_amplitude], ':', color='#2f2f2f')
+    plt.plot([time_of_recovery, time_of_recovery], [0, 10], '--', color='#c62828')
+    plt.plot([flash_time, flash_time], [0, 10], '--', color='#000000')
+    plt.plot([peak_time, peak_time], [0, 10], '--', color='#4caf50')
     plt.xlim([t_mn, t_mx])
     plt.xlabel('Time (Seconds)')
     plt.ylabel('Pupil Diameter (mm)')
