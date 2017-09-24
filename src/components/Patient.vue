@@ -1,6 +1,6 @@
 <template>
   <v-layout>
-    <v-flex xs6 class='mr-2'>
+    <v-flex xs7 class='mr-2'>
         <v-card>
           <v-card-title>
             <v-subheader>
@@ -8,12 +8,6 @@
             </v-subheader>
             <v-spacer>
             </v-spacer>
-            <v-btn primary @click.native='createScan'>
-             <v-icon left>
-               add_circle
-             </v-icon>
-             Add Scan
-            </v-btn>
           </v-card-title>
             <v-divider></v-divider>
             <v-card-text>
@@ -26,7 +20,8 @@
                 <template slot="items" scope="props">
                   <td>
                     <v-subheader class='upper'>
-                      <router-link :to="{name:'Scan', params:{'id': props.item._id}}">
+                      <router-link 
+                        :to="{name:'Scan', params:{'id': props.item._id}}">
                        {{ props.item.createdAt }}
                       </router-link>
                     </v-subheader>
@@ -34,9 +29,20 @@
                 </template>
               </v-data-table>
             </v-card-text>
+            <v-divider></v-divider>
+            <v-card-actions>
+                <v-spacer>
+                </v-spacer>
+                <v-btn primary @click.native='createScan'>
+                 <v-icon left>
+                   add_circle
+                 </v-icon>
+                 Add Scan
+                </v-btn>
+            </v-card-actions>
         </v-card>
     </v-flex>
-    <v-flex xs6>
+    <v-flex xs5>
       <v-card class='elevation-1'>
         <v-card-title>
           <h4 class='mt-2 yellow--text text--darken-3'
@@ -50,12 +56,6 @@
             <v-icon class='white--text'>
               delete_forever
             </v-icon>
-          </v-btn>
-          <v-btn @click.native='updatePatient' primary>
-            <v-icon left>
-              update
-            </v-icon>
-            Update
           </v-btn>
         </v-card-title>
         <v-divider></v-divider>
@@ -89,6 +89,17 @@
             </v-flex>
           </v-layout>
         </v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions>
+        <v-spacer></v-spacer>
+          <v-btn @click.native='updatePatient' primary>
+            <v-icon left>
+              update
+            </v-icon>
+            Update
+          </v-btn>
+
+       </v-card-actions>
       </v-card>
     </v-flex>
 

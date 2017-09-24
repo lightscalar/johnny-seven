@@ -22,4 +22,8 @@ var app = new Vue({
   components: { App }
 })
 
+Vue.filter('formatNumber', function(value, formatString) {
+  return sprintf(formatString, value)
+})
+
 window.router = app.$router

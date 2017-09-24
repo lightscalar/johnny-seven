@@ -183,10 +183,44 @@
       results () {
 
         var res = []
-        res.push({description: 'Amplitude', left: 5, right: 4, units: 'mm'})
-        res.push({description: 'Average Velocity', left: 5, right: 4, units: 'mm/s'})
-        res.push({description: 'Latency', left: 5, right: 4, units: 'ms'})
-        res.push({description: 'Recovery Time', left: 5, right: 4, units: 'ms'})
+
+        res.push({
+            description: 'Starting Diameter',
+            left: this.scan.left.starting_diameter,
+            right: this.scan.right.starting_diameter,
+            units: 'mm'
+        })
+        res.push({
+            description: 'Minimum Diameter',
+            left: this.scan.left.minimum_diameter,
+            right: this.scan.right.minimum_diameter,
+            units: 'mm'
+        })
+        res.push({
+            description: 'Absolute Diameter Change',
+            left: this.scan.left.absolute_diameter_change,
+            right: this.scan.right.absolute_diameter_change,
+            units: 'mm'
+        })
+        res.push({
+            description: 'Relative Diameter Change',
+            left: this.scan.left.relative_diameter_change,
+            right: this.scan.right.relative_diameter_change,
+            units: '%'
+        })
+        res.push({
+            description: 'Average Constriction Speed',
+            left: this.scan.left.average_speed,
+            right: this.scan.right.average_speed,
+            units: 'mm/s'
+        })
+        res.push({
+            description: '75% Recovery Time',
+            left: this.scan.left.recovery_time,
+            right: this.scan.right.recovery_time,
+            units: 's'
+        })
+
         return res
 
       }
