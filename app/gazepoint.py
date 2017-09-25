@@ -3,9 +3,7 @@ from flash_lamp import FlashLamp
 from gazepoint_parser import *
 import numpy as np
 from data_explorer import *
-import serial
 import socket
-from threading import Thread
 import time
 
 
@@ -22,10 +20,11 @@ class GazePoint(object):
         self.is_collecting = False
         self.events = Events()
 
+    def connect(self):
         # Establish connection to Gazepoint.
         try:
             print('Establishing connection to Gazepoint.')
-            self.socket = s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect(self.address)
             s.send(str.encode('<SET ID="ENABLE_SEND_TIME" STATE="1" />\r\n'))
             s.send(str.encode('<SET ID="ENABLE_SEND_EYE_LEFT" STATE="1" />\r\n'))
@@ -35,6 +34,7 @@ class GazePoint(object):
         except:
             print('Cannot establish connection to Gazepoint.')
             self.connected = False
+        return s
 
     def collect(self, scan):
         # Start collecting from the Gazepoint system.
@@ -48,26 +48,26 @@ class GazePoint(object):
         max_time = 0
         flashed = False
         flash_time = 0
+        with self.connect() as socket:
+            # Standard 16 second scan.
+            while (time.time() - start_time) < 16:
 
-        # Standard 16 second scan.
-        while (time.time() - start_time) < 16:
+                # Grab the time stamp.
+                rx_data = socket.recv(512)
+                xml_obs = bytes.decode(rx_data)
+                ts = xml_to_time(xml_obs)
+                python_time.append(time.time())
 
-            # Grab the time stamp.
-            rx_data = self.socket.recv(512)
-            xml_obs = bytes.decode(rx_data)
-            ts = xml_to_time(xml_obs)
-            python_time.append(time.time())
+                # Append raw XML observations
+                scanner_data.append(xml_obs)
 
-            # Append raw XML observations
-            scanner_data.append(xml_obs)
-
-            # Should we flash the lamp?
-            if (time.time() - start_time) >= 8:
-                if not flashed:
-                    print('Flashing Lamp')
-                    flash_time = (time.time(), ts)
-                    self.lamp.flash_lamp()
-                    flashed=True
+                # Should we flash the lamp?
+                if (time.time() - start_time) >= 8:
+                    if not flashed:
+                        print('Flashing Lamp')
+                        flash_time = (time.time(), ts)
+                        self.lamp.flash_lamp()
+                        flashed=True
 
         # We are done. Now parse the data, etc.
         print('Finished Data Collection')

@@ -121,7 +121,11 @@ def extract_plr(t, dr, flash_time, scan_id='1234', which_eye='LEFT'):
     except:
         roc = inf
 
-    roc = taut_string(roc, 0.20)
+    roc = taut_string(roc, 0.10)
+    g = Fit(t_, 100, basis_type='cubic-spline', reg_coefs=[0, 1e-2, 1e-3])
+    rc = g.fit(roc)
+    roc = rc.y
+
 
     peaks = []
     for itr, val in enumerate(roc):
@@ -131,11 +135,11 @@ def extract_plr(t, dr, flash_time, scan_id='1234', which_eye='LEFT'):
             peaks.append(t_[itr])
 
     # Light flash time.
-    closest_index = np.abs(t_ - flash_time)
+    closest_index = np.abs(r.x - flash_time)
     flash_idx = np.argmin(closest_index)
 
     # Starting amplitude.
-    starting_amplitude = dr[flash_idx]
+    starting_amplitude = r.y[flash_idx]
 
     # Find the peak in the curvature.
     peaks = np.array(peaks)
@@ -156,7 +160,7 @@ def extract_plr(t, dr, flash_time, scan_id='1234', which_eye='LEFT'):
     minimum_amplitude = v_min
     minimum_time = t_min
     delta_amplitude = starting_amplitude - minimum_amplitude
-    average_speed = (delta_amplitude)/(minimum_time - peak_time)
+    average_speed = (delta_amplitude)/(minimum_time - flash_time)
 
     # Find the recovery time.
     recovery_amplitude = 0.75 * delta_amplitude + minimum_amplitude
@@ -169,6 +173,7 @@ def extract_plr(t, dr, flash_time, scan_id='1234', which_eye='LEFT'):
         time_of_recovery = t_after_min[recovery_idx]
     else:
         recovery_time = -1
+        time_of_recovery = 5
 
     package = {}
     package['latency'] = latency
@@ -183,7 +188,7 @@ def extract_plr(t, dr, flash_time, scan_id='1234', which_eye='LEFT'):
     plt.close('all')
     plt.plot(r.x, r.y, color='#c62828', linewidth=3)
     plt.plot(t_, roc, color='#305580', linewidth=3, alpha=0.5)
-    y_lim = plt.ylim([med_amplitude-3*std_amplitude, med_amplitude + std_amplitude])
+    y_lim = plt.ylim([med_amplitude-3*std_amplitude, med_amplitude + 2*std_amplitude])
     plt.plot([0, 5], [starting_amplitude, starting_amplitude], ':', color='#2f2f2f')
     plt.plot([0, 5], [minimum_amplitude, minimum_amplitude], ':', color='#2f2f2f')
     plt.plot([time_of_recovery, time_of_recovery], [0, 10], '--', color='#c62828')
@@ -193,6 +198,8 @@ def extract_plr(t, dr, flash_time, scan_id='1234', which_eye='LEFT'):
     plt.xlabel('Time (Seconds)')
     plt.ylabel('Pupil Diameter (mm)')
     location = '../static/plots'
+    plt.savefig('{}/{}_{}.png'.format(location, scan_id, which_eye))
+    location = '../dist/static/plots'
     plt.savefig('{}/{}_{}.png'.format(location, scan_id, which_eye))
     return package
 
@@ -205,6 +212,7 @@ if __name__ == '__main__':
     # Run diagnostics on the last scan run.
     diagnostics = Vessel('diagnostics.dat')
     package = diagnostics.package
+    diagnostics.scan['_id'] = 'DIAGNOSTICS'
     scan = diagnostics.scan
     scan = process_raw_data(package, scan)
     t, ft, left, right = retrieve_series(package)

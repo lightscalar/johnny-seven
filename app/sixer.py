@@ -6,7 +6,9 @@ words = f.read().split('\n')
 def sixer():
     one = np.random.randint(len(words))
     two = np.random.randint(len(words))
-    return words[one] + words[two]
+    word = words[one] + words[two]
+    word = word[:6]
+    return word 
 
 
 if __name__ == '__main__':

@@ -1,5 +1,3 @@
-import eventlet
-eventlet.monkey_patch()
 import http.server
 import socketserver
 import os

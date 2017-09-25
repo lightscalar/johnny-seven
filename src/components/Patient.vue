@@ -1,48 +1,6 @@
 <template>
-  <v-layout>
-    <v-flex xs7 class='mr-2'>
-        <v-card>
-          <v-card-title>
-            <v-subheader>
-              Patient Scans
-            </v-subheader>
-            <v-spacer>
-            </v-spacer>
-          </v-card-title>
-            <v-divider></v-divider>
-            <v-card-text>
-              <v-data-table
-                v-bind:pagination.sync="pagination"
-                v-bind:headers="headers"
-                :items="scans"
-                no-data-text='No Scans Available'
-                class="elevation-0">
-                <template slot="items" scope="props">
-                  <td>
-                    <v-subheader class='upper'>
-                      <router-link 
-                        :to="{name:'Scan', params:{'id': props.item._id}}">
-                       {{ props.item.createdAt }}
-                      </router-link>
-                    </v-subheader>
-                  </td>
-                </template>
-              </v-data-table>
-            </v-card-text>
-            <v-divider></v-divider>
-            <v-card-actions>
-                <v-spacer>
-                </v-spacer>
-                <v-btn primary @click.native='createScan'>
-                 <v-icon left>
-                   add_circle
-                 </v-icon>
-                 Add Scan
-                </v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-flex>
-    <v-flex xs5>
+  <v-layout row wrap>
+    <v-flex xs12>
       <v-card class='elevation-1'>
         <v-card-title>
           <h4 class='mt-2 yellow--text text--darken-3'
@@ -56,6 +14,12 @@
             <v-icon class='white--text'>
               delete_forever
             </v-icon>
+          </v-btn>
+          <v-btn @click.native='updatePatient' primary>
+            <v-icon left>
+              update
+            </v-icon>
+            Update
           </v-btn>
         </v-card-title>
         <v-divider></v-divider>
@@ -92,15 +56,50 @@
         <v-divider></v-divider>
         <v-card-actions>
         <v-spacer></v-spacer>
-          <v-btn @click.native='updatePatient' primary>
-            <v-icon left>
-              update
-            </v-icon>
-            Update
-          </v-btn>
 
        </v-card-actions>
       </v-card>
+    </v-flex>
+    <br/>
+    <v-flex xs12 >
+        <v-card>
+          <v-card-title>
+            <v-subheader>
+              Patient Scans
+            </v-subheader>
+                <v-spacer>
+                </v-spacer>
+                <v-btn primary @click.native='createScan'>
+                 <v-icon left>
+                   add_circle
+                 </v-icon>
+                 Add Scan
+                </v-btn>
+          </v-card-title>
+            <v-divider></v-divider>
+            <v-card-text>
+              <v-data-table
+                v-bind:pagination.sync="pagination"
+                v-bind:headers="headers"
+                :items="scans"
+                no-data-text='No Scans Available'
+                class="elevation-0">
+                <template slot="items" scope="props">
+                  <td>
+                    <v-subheader class='upper'>
+                      <router-link 
+                        :to="{name:'Scan', params:{'id': props.item._id}}">
+                       {{ props.item.createdAt }}
+                      </router-link>
+                    </v-subheader>
+                  </td>
+                </template>
+              </v-data-table>
+            </v-card-text>
+            <v-divider></v-divider>
+            <v-card-actions>
+            </v-card-actions>
+        </v-card>
     </v-flex>
 
     <v-snackbar v-model='showMessage' :top=true primary>

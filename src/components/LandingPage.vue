@@ -7,6 +7,15 @@
         <v-subheader>
           Patients
         </v-subheader>
+        <v-spacer></v-spacer>
+        <v-btn
+          primary
+          @click.native='createPatient'>
+          <v-icon left>
+            person_add
+          </v-icon>
+          Add New Patient
+        </v-btn>
       </v-card-title>
       <v-divider></v-divider>
       <v-card-text>
@@ -29,17 +38,6 @@
         </v-data-table>
       </v-card-text>
       <v-divider></v-divider>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn
-          primary
-          @click.native='createPatient'>
-          <v-icon left>
-            person_add
-          </v-icon>
-          Add New Patient
-        </v-btn>
-        </v-card-actions>
     </v-card>
 
     </v-flex>

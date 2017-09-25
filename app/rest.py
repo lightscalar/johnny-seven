@@ -1,11 +1,11 @@
-import eventlet
-from eventlet import wsgi
+# from eventlet import wsgi
+# import eventlet
+from gevent.wsgi import WSGIServer
 from flask import Flask, request, jsonify, Response
 from flask_restful import Resource, Api
 from flask_cors import CORS
 from sixer import sixer
 from solid_db import *
-from time import sleep
 from gazepoint import GazePoint
 
 
@@ -121,5 +121,7 @@ api.add_resource(Commands, '/commands')
 
 
 if __name__ == '__main__':
-    wsgi.server(eventlet.listen(('localhost', PORT)), app)
-
+    # wsgi.server(eventlet.listen(('localhost', PORT)), app)
+    # app.run(port=PORT, threaded=True)
+    http_server = WSGIServer(('', PORT), app)
+    http_server.serve_forever()

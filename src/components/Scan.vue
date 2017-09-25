@@ -117,10 +117,10 @@
                 {{props.item.description}}
               </td>
               <td>
-                {{props.item.left | formatNumber('%0.3f')}}
+                {{props.item.left | formatNumber('%0.2f')}}
               </td>
               <td>
-                {{props.item.right | formatNumber('%0.3f')}}
+                {{props.item.right | formatNumber('%0.2f')}}
               </td>
               <td>
                 {{props.item.units}}
@@ -133,12 +133,12 @@
         <v-card>
             <v-card-title>
             <v-subheader>
-                Right Eye Scan
+                Left Eye Scan
             </v-subheader>
             </v-card-title>
             <v-divider></v-divider>
             <v-card-text>
-                <img class='scan-plot' v-bind:src='scanPlotUrl("RIGHT")'/>
+                <img class='scan-plot' v-bind:src='scanPlotUrl("LEFT")'/>
             </v-card-text>
         </v-card>
         <br/>
@@ -150,7 +150,7 @@
             </v-card-title>
             <v-divider></v-divider>
             <v-card-text>
-                <img class='scan-plot' v-bind:src='scanPlotUrl("LEFT")'/>
+                <img class='scan-plot' v-bind:src='scanPlotUrl("RIGHT")'/>
             </v-card-text>
         </v-card>
     </v-flex>
@@ -190,7 +190,7 @@
       },
 
       scanPlotUrl(whichEye) {
-        return 'plots/' + this.scan._id + '_' + whichEye + '.png'
+        return 'static/plots/' + this.scan._id + '_' + whichEye + '.png'
       },
 
     },
@@ -239,6 +239,12 @@
             units: '%'
         })
         res.push({
+            description: 'Latency',
+            left: this.scan.left.latency * 1000,
+            right: this.scan.right.latency * 1000,
+            units: 'ms'
+        })
+        res.push({
             description: 'Average Constriction Speed',
             left: this.scan.left.average_speed,
             right: this.scan.right.average_speed,
@@ -246,9 +252,9 @@
         })
         res.push({
             description: '75% Recovery Time',
-            left: this.scan.left.recovery_time,
-            right: this.scan.right.recovery_time,
-            units: 's'
+            left: this.scan.left.recovery_time * 1000,
+            right: this.scan.right.recovery_time * 1000,
+            units: 'ms'
         })
 
         return res
