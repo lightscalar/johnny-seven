@@ -1,5 +1,3 @@
-# from eventlet import wsgi
-# import eventlet
 from gevent.wsgi import WSGIServer
 from flask import Flask, request, jsonify, Response
 from flask_restful import Resource, Api
@@ -7,6 +5,7 @@ from flask_cors import CORS
 from sixer import sixer
 from solid_db import *
 from gazepoint import GazePoint
+from generate_summaries import generate_summaries
 
 
 '''RESTFUL API for Johnny Seven'''
@@ -111,6 +110,14 @@ class Commands(Resource):
         scan = db.update(scan)
         return scan
 
+class Download(Resource):
+
+    def get(self, patient_id):
+        # Create download.
+        file_url = generate_summaries(patient_id)
+        return file_url
+
+
 
 # ADD RESOURCE ROUTES.
 api.add_resource(Patients, '/patients')
@@ -118,6 +125,7 @@ api.add_resource(Patient, '/patient/<string:_id>')
 api.add_resource(Scans, '/patient/<string:patient_id>/scans')
 api.add_resource(Scan, '/scan/<string:_id>')
 api.add_resource(Commands, '/commands')
+api.add_resource(Download, '/download/<string:patient_id>')
 
 
 if __name__ == '__main__':

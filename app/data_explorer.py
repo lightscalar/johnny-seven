@@ -57,7 +57,12 @@ def process_raw_data(package, scan):
     flash_time = package[0]
     raw_data = package[1]
     scan['flash_time'] = flash_time[1]
-    scan['raw_data'] = raw_data
+    s = Vessel('data/raw/{}.dat'.format(scan['_id']))
+    # Don't save raw data to database; save to Vessel on disk.
+    s.raw_data = raw_data
+    s.flash_time = flash_time[1]
+    s.save()
+    # Save diagnostic info on last scan.
     v = Vessel('diagnostics.dat')
     v.package = package
     v.scan = scan
@@ -70,15 +75,15 @@ def process_raw_data(package, scan):
     left = np.array(tser['left']['diameter'])
     right = np.array(tser['right']['diameter'])
 
-#    try:
-    scan['left'] = extract_plr(t, left, flash_time, scan_id=scan['_id'], \
-            which_eye='LEFT')
-    scan['right'] = extract_plr(t, right, flash_time, scan_id=scan['_id'], \
-            which_eye='RIGHT')
-    scan['isSuccess'] = True
-#    except:
-#        print('Data Processing of Scan Failed')
-#        scan['isSuccess'] = False
+    try:
+        scan['left'] = extract_plr(t, left, flash_time, scan_id=scan['_id'], \
+                which_eye='LEFT')
+        scan['right'] = extract_plr(t, right, flash_time, scan_id=scan['_id'], \
+                which_eye='RIGHT')
+        scan['isSuccess'] = True
+    except:
+        print('Data Processing of Scan Failed')
+        scan['isSuccess'] = False
 
     return scan
 
@@ -98,17 +103,9 @@ def extract_plr(t, dr, flash_time, scan_id='1234', which_eye='LEFT'):
     dr = taut_string(dr, 0.01)
     
     # Fit with cubic splines
-    # flash_time = flash_time[1] - t_start
-    # t_mn = flash_time - 1.0 _
-    # t_mx = flash_time + 5.0
     t_mn = 0
     t_mx = 5
 
-    # t_mn -= t.min()
-    # t_mx -= t.min()
-    # flash_time -= t.min()
-    # t -= t.min()
-    
     idx = q( (t>t_mn) * (t<t_mx))
     t_ = t[idx]
     dr_ = dr[idx]
@@ -191,9 +188,9 @@ def extract_plr(t, dr, flash_time, scan_id='1234', which_eye='LEFT'):
     y_lim = plt.ylim([med_amplitude-3*std_amplitude, med_amplitude + 2*std_amplitude])
     plt.plot([0, 5], [starting_amplitude, starting_amplitude], ':', color='#2f2f2f')
     plt.plot([0, 5], [minimum_amplitude, minimum_amplitude], ':', color='#2f2f2f')
-    plt.plot([time_of_recovery, time_of_recovery], [0, 10], '--', color='#c62828')
-    plt.plot([flash_time, flash_time], [0, 10], '--', color='#000000')
-    plt.plot([peak_time, peak_time], [0, 10], '--', color='#4caf50')
+    plt.plot([time_of_recovery, time_of_recovery], [0, 20], '--', color='#c62828')
+    plt.plot([flash_time, flash_time], [0, 20], '--', color='#000000')
+    plt.plot([peak_time, peak_time], [0, 20], '--', color='#4caf50')
     plt.xlim([t_mn, t_mx])
     plt.xlabel('Time (Seconds)')
     plt.ylabel('Pupil Diameter (mm)')

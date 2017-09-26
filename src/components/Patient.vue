@@ -1,6 +1,7 @@
 <template>
-  <v-layout row wrap>
-    <v-flex xs12>
+  <div>
+  <v-layout>
+    <v-flex>
       <v-card class='elevation-1'>
         <v-card-title>
           <h4 class='mt-2 yellow--text text--darken-3'
@@ -8,14 +9,35 @@
             {{patient.hid}}
           </h4>
           <v-spacer></v-spacer>
+
+          <v-btn flat primary @click.native='downloadData' v-if="downloadStatus=='notReady'">
+            <v-icon left>cloud_download</v-icon>
+            Download
+          </v-btn>
+
+          <v-btn v-if="downloadStatus=='preparing'">
+            <v-icon left>
+              av_timer
+             </v-icon>
+             One Moment...
+          </v-btn>
+          
+          <v-btn :href='fileUrl' v-if="downloadStatus=='ready'">
+            <v-icon left>
+                file_download
+             </v-icon>
+             Download
+          </v-btn>
+
           <v-btn
-            @click.native='deletePatient'
-            error icon>
+            @click.native='deletePatient' error>
             <v-icon class='white--text'>
               delete_forever
             </v-icon>
           </v-btn>
-          <v-btn @click.native='updatePatient' primary>
+          
+          <v-btn 
+            @click.native='updatePatient' primary>
             <v-icon left>
               update
             </v-icon>
@@ -53,15 +75,14 @@
             </v-flex>
           </v-layout>
         </v-card-text>
-        <v-divider></v-divider>
-        <v-card-actions>
-        <v-spacer></v-spacer>
-
-       </v-card-actions>
       </v-card>
     </v-flex>
+    </v-layout>
+
     <br/>
-    <v-flex xs12 >
+
+    <v-layout>
+    <v-flex>
         <v-card>
           <v-card-title>
             <v-subheader>
@@ -96,9 +117,6 @@
                 </template>
               </v-data-table>
             </v-card-text>
-            <v-divider></v-divider>
-            <v-card-actions>
-            </v-card-actions>
         </v-card>
     </v-flex>
 
@@ -107,6 +125,7 @@
     </v-snackbar>
 
   </v-layout>
+  </div>
 
 </template>
 
@@ -121,7 +140,6 @@
 
     data () {
       return {
-
         message: '',
         showMessage: false,
         gcs: [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
@@ -129,9 +147,13 @@
           {text: 'Female', value: 'female'},
           {text: 'Male', value: 'male'}
         ],
-        headers: [{text: 'Created At', sortable: true, align:'left', value:'createdAt'}],
-        pagination: {sortBy: 'createdAt'}
-
+        headers: [{
+            text: 'Created At', 
+            sortable: true, 
+            align:'left', 
+            value:'createdAt'
+            }],
+        pagination: {sortBy: 'createdAt'},
       }
     },
 
@@ -149,11 +171,23 @@
 
       createScan () {
         this.$store.dispatch('createScan', this.id)
+      },
+
+      downloadData () {
+        this.$store.dispatch('getDownload', this.patient._id)
       }
 
     },
 
     computed: {
+
+      downloadStatus () {
+          return this.$store.state.downloadStatus
+      },
+
+      fileUrl () {
+        return this.$store.state.fileUrl
+      },
 
       patient () {
         return this.$store.state.patient
@@ -169,7 +203,7 @@
     mounted () {
       this.$store.dispatch('getPatient', this.id)
       this.$store.dispatch('getScans', this.id)
-
+      this.$store.commit('setDownloadStatus', 'notReady')
     }
   }
 

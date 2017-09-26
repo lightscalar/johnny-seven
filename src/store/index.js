@@ -13,7 +13,9 @@ export default new Vuex.Store ({
     patients: [],
     scan: {},
     scans: [],
-    isScanning: false
+    isScanning: false,
+    downloadStatus: 'notReady',
+    fileUrl: ''
   },
 
   mutations: {
@@ -36,8 +38,15 @@ export default new Vuex.Store ({
 
     setScanning (state, isScanning) {
       state.isScanning = isScanning
-    }
+    },
 
+    setDownloadStatus (state, downloadStatus) {
+       state.downloadStatus = downloadStatus
+    },
+
+    setFileUrl (state, fileUrl) {
+       state.fileUrl = fileUrl
+    }
 
   },
 
@@ -109,6 +118,14 @@ export default new Vuex.Store ({
       api.deleteResource('scan', scan_id).then(function (resp) {
         router.push({name:'Patient', params:{id:resp.data._id}})
       })
+    },
+
+    getDownload(context, patient_id) {
+        context.commit('setDownloadStatus', 'preparing')
+        api.getResource('download', patient_id).then( function (resp) {
+            context.commit('setFileUrl', resp.data)
+            context.commit('setDownloadStatus', 'ready')
+        })
     }
 
  },

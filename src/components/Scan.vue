@@ -56,7 +56,10 @@
               class="blue--text text--darken-3">
             </v-progress-circular>
           </v-flex>
-          <v-flex lg6 md6>
+          <v-flex lg6 md6 v-if='processing'>
+            <h5 class='mt-4'>Scan Complete. Processing data...</h5>
+          </v-flex>
+          <v-flex lg6 md6 v-else>
             <h5 class='mt-4'>Hold Steady. Scan is underway!</h5>
           </v-flex>
         </v-layout>
@@ -175,14 +178,17 @@
           {text: 'Left', value: 'left', sortable: false, align: 'left'},
           {text: 'Right', value: 'right', sortable: false, align: 'left'},
           {text: 'Units', value: 'units', sortable: false, align: 'left'},
-        ]
+        ],
+        processing: false
       }
     },
 
     methods: {
 
       startScan () {
+        var self = this  
         this.$store.dispatch('startScan', this.scan)
+        setTimeout(function(){self.processing=true}, 16000)
       },
 
       deleteScan () {
